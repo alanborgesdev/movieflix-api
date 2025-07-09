@@ -1,17 +1,23 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import express from "express";
 import { PrismaClient } from "@prisma/client";
 import swaggerUI from "swagger-ui-express";
 import swaggerDocument from "../swagger.json" with { type: 'json' };
-
 const port = 3000;
 const app = express();
 const prisma = new PrismaClient();
-
 app.use(express.json());
 app.use("/docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));
-
-app.get("/movies", async (_, res) => {
-    const movies = await prisma.movie.findMany({
+app.get("/movies", (_, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const movies = yield prisma.movie.findMany({
         orderBy: {
             title: "asc",
         },
@@ -21,31 +27,24 @@ app.get("/movies", async (_, res) => {
         },
     });
     res.json(movies);
-});
-
-app.post("/movies", async (req, res) => {
+}));
+app.post("/movies", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { title, genre_id, language_id, oscar_count, release_date } = req.body;
-
     try {
         // case sensitive - se buscar por john wick e no banco estiver como John wick, não vai ser retornado na consulta
-
         // const movieWithSameTitle = await prisma.movie.findFirst({
         //     where: { title },
         // });
-
         // case insensitive - se a busca for feita por john wich ou John wick ou JOHN WICK, o registro vai ser retornado na consulta
-
-        const movieWithSameTitle = await prisma.movie.findFirst({
+        const movieWithSameTitle = yield prisma.movie.findFirst({
             where: { title: { equals: title, mode: "insensitive" } },
         });
-
         if (movieWithSameTitle) {
             return res
                 .status(409)
                 .send({ message: "Já existe um filme cadastrado com esse título" });
         }
-
-        await prisma.movie.create({
+        yield prisma.movie.create({
             data: {
                 title,
                 genre_id,
@@ -54,64 +53,57 @@ app.post("/movies", async (req, res) => {
                 release_date: new Date(release_date),
             },
         });
-    } catch (error) {
+    }
+    catch (error) {
         return res.status(500).send({ message: "Falha ao cadastrar um filme" });
     }
     res.status(201).send();
-});
-
-app.put("/movies/:id", async (req, res) => {
+}));
+app.put("/movies/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // pegar  o id do registro que vai ser atualizado
     const id = Number(req.params.id);
-
     try {
-        const movie = await prisma.movie.findUnique({
+        const movie = yield prisma.movie.findUnique({
             where: {
                 id,
             },
         });
-
         if (!movie) {
             return res.status(404).send({ message: "Filme não encontrado" });
         }
-
-        const data = { ...req.body };
+        const data = Object.assign({}, req.body);
         data.release_date = data.release_date ? new Date(data.release_date) : undefined;
-
         // pegar os dados do filme que será atualizado e atualizar ele no prisma
-        await prisma.movie.update({
+        yield prisma.movie.update({
             where: {
                 id,
             },
             data: data,
         });
-    } catch (error) {
+    }
+    catch (error) {
         return res.status(500).send({ message: "Falha ao atualizar o registro do filme" });
     }
     // retornar o status correto informando que o filme foi atualizado
     res.status(200).send();
-});
-
-app.delete("/movies/:id", async (req, res) => {
+}));
+app.delete("/movies/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = Number(req.params.id);
-
     try {
-        const movie = await prisma.movie.findUnique({ where: { id } });
-
+        const movie = yield prisma.movie.findUnique({ where: { id } });
         if (!movie) {
             return res.status(404).send({ message: "O filme não foi encontrado" });
         }
-
-        await prisma.movie.delete({ where: { id } });
-    } catch (error) {
+        yield prisma.movie.delete({ where: { id } });
+    }
+    catch (error) {
         return res.status(500).send({ message: "Não foi possível remover o filme" });
     }
     res.status(200).send();
-});
-
-app.get("/movies/:genreName", async (req, res) => {
+}));
+app.get("/movies/:genreName", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const moviesFilteredByGenreName = await prisma.movie.findMany({
+        const moviesFilteredByGenreName = yield prisma.movie.findMany({
             include: {
                 genres: true,
                 languages: true,
@@ -126,11 +118,11 @@ app.get("/movies/:genreName", async (req, res) => {
             },
         });
         res.status(200).send(moviesFilteredByGenreName);
-    } catch (error) {
+    }
+    catch (error) {
         res.status(500).send({ message: "Falha ao filtrar filmes por gênero" });
     }
-});
-
+}));
 app.listen(port, () => {
     console.log(`Servidor em execução na porta ${port}`);
 });

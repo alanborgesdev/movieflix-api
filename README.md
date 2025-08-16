@@ -53,7 +53,7 @@ npx prisma migrate dev
 npm run dev
 
 # 6. A API estará rodando em http://localhost:3000
-
+```
 ---
 
 ### 👤 Autor  

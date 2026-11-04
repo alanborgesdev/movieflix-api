@@ -40,7 +40,10 @@
         "isolatedModules": true,
         "noUncheckedSideEffectImports": true,
         "moduleDetection": "force",
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "module": "preserve",
+        "moduleResolution": "bundler",
+        "resolveJsonModule": true
     },
     "include": ["src"]
 }

@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "npx tsx watch src/server.ts",
+    "start": "node dist/src/server.js",
+    "build": "tsc",
     "contract:emit": "prisma contract emit",
     "postinstall": "prisma skills sync || exit 0"
   },

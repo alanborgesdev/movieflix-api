@@ -1,8 +1,8 @@
 import 'dotenv/config';
 import express from 'express';
-import { PrismaClient } from './generated/prisma/client';
+import { PrismaClient } from './generated/prisma/client.js';
 import swaggerUI from 'swagger-ui-express';
-import swaggerDocument from '../swagger.json';
+import swaggerDocument from '../swagger.json' with { type: 'json' };
 
 const port = 3000;
 const app = express();

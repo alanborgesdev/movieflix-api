@@ -221,6 +221,32 @@ app.get('/genres', async (_, res) => {
     }
 });
 
+app.delete('/genres/:id', async (req, res) => {
+    const id = Number(req.params.id);
+
+    if (Number.isNaN(id)) {
+        return res.status(400).send({ message: 'ID inválido' });
+    }
+
+    try {
+        const genre = await prisma.genre.findUnique({ where: { id } });
+
+        if (!genre) {
+            return res
+                .status(404)
+                .send({ message: 'O gênero não foi encontrado' });
+        }
+
+        await prisma.genre.delete({ where: { id } });
+    } catch (error) {
+        return res
+            .status(500)
+            .send({ message: 'Não foi possível remover o gênero' });
+    }
+
+    res.status(200).send();
+});
+
 app.listen(port, () => {
     console.log(`Servidor em execução na porta ${port}`);
 });

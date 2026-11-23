@@ -210,6 +210,17 @@ app.post('/genres', async (req, res) => {
     res.status(201).send();
 });
 
+app.get('/genres', async (_, res) => {
+    try {
+        const genres = await prisma.genre.findMany({
+            orderBy: { name: 'asc' },
+        });
+        res.status(200).send(genres);
+    } catch (error) {
+        return res.status(500).send({ message: 'Falha ao listar os gêneros' });
+    }
+});
+
 app.listen(port, () => {
     console.log(`Servidor em execução na porta ${port}`);
 });

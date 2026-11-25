@@ -11,19 +11,6 @@ const prisma = new PrismaClient();
 app.use(express.json());
 app.use('/docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
-app.get('/movies', async (_, res) => {
-    const movies = await prisma.movie.findMany({
-        orderBy: {
-            title: 'asc',
-        },
-        include: {
-            genres: true,
-            languages: true,
-        },
-    });
-    res.json(movies);
-});
-
 app.post('/movies', async (req, res) => {
     const { title, genre_id, language_id, oscar_count, release_date } =
         req.body;
@@ -245,6 +232,37 @@ app.delete('/genres/:id', async (req, res) => {
     }
 
     res.status(200).send();
+});
+
+app.get('/movies', async (_, res) => {
+    try {
+        const movies = await prisma.movie.findMany({
+            orderBy: { title: 'asc' },
+            include: {
+                genres: true,
+                languages: true,
+            },
+        });
+
+        const totalMovies = movies.length;
+        const moviesWithDuration = movies.filter(
+            (movie) => movie.duration !== null
+        );
+        const totalDuration = moviesWithDuration.reduce(
+            (sum, movie) => sum + movie.duration!,
+            0
+        );
+        const averageDuration =
+            moviesWithDuration.length === 0
+                ? null
+                : Number(
+                      (totalDuration / moviesWithDuration.length).toFixed(2)
+                  );
+        res.status(200).send({ movies, totalMovies, averageDuration });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({ message: 'Falha ao listar os filmes' });
+    }
 });
 
 app.listen(port, () => {
